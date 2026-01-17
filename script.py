@@ -2,21 +2,26 @@ import json
 import hmac
 import hashlib
 import urllib.request
+import os
 from datetime import datetime, timezone
 
-URL = "https://b12.io/apply/submission"
+URL = "http://localhost:8000/"
 SECRET = b"hello-there-from-b12"
+REPO_LINK = os.environ.get('REPO_URL')
+RUN_ID = os.environ.get('RUN_URL')
 
-# Generates ISO 8601 timestamp: YYYY-MM-DDTHH:MM:SS.mmmZ
+if not REPO_LINK and not RUN_ID:
+    raise Exception("Script didn't run in GH actions environment")
+
 timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
 payload = {
     "timestamp": timestamp,
-    "name": "Your Name",
-    "email": "you@example.com",
-    "resume_link": "https://linkedin.com/in/yourprofile",
-    "repository_link": "https://github.com/youruser/yourrepo",
-    "action_run_link": "https://github.com/youruser/yourrepo/actions/runs/123456789"
+    "name": "Hamsa Abdirashid",
+    "email": "hamzsaabdi@gmail.com",
+    "resume_link": "https://www.linkedin.com/in/hamsaabdi/",
+    "repository_link": REPO_LINK,
+    "action_run_link": RUN_ID
 }
 
 # Create minified JSON and generate HMAC-SHA256 signature
@@ -32,7 +37,14 @@ req = urllib.request.Request(URL, data=body, headers=headers, method="POST")
 
 try:
     with urllib.request.urlopen(req) as response:
-        res_data = json.loads(response.read().decode('utf-8'))
-        print(res_data.get("receipt"))
+        res_text = response.read().decode('utf-8')
+        if "localhost" not in URL:
+            res_data = json.loads(res_text)
+            print(res_data)
+            print(f"Success! {res_data.get('receipt')}")
+        else:
+            print("Script not running in actions environment!")
+            print(res_text)
+            
 except urllib.error.HTTPError as e:
     print(f"Error {e.code}: {e.read().decode()}")
