@@ -5,7 +5,7 @@ import urllib.request
 import os
 from datetime import datetime, timezone
 
-URL = "http://localhost:8000/"
+URL = "https://b12.io/apply/submission"
 SECRET = b"hello-there-from-b12"
 REPO_LINK = os.environ.get('REPO_URL')
 RUN_ID = os.environ.get('RUN_URL')
